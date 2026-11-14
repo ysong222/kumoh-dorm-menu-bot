@@ -1,0 +1,56 @@
+name: 식단 알림
+
+on:
+  # cron은 UTC 기준입니다. KST = UTC + 9시간.
+  # 아래 식을 바꾸면 main.py 의 CRON_TO_MODE 도 똑같이 바꿔야 합니다.
+  schedule:
+    - cron: "0 23 * * 0-4" # KST 월~금 08:00 → 중식+석식 미리보기 (UTC로는 전날 일~목 23:00)
+    - cron: "0 2 * * 1-5" # KST 월~금 11:00 → 중식
+    - cron: "30 7 * * 1-5" # KST 월~금 16:30 → 석식
+  # Actions 탭에서 수동 실행 (테스트용)
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "알림 종류"
+        required: true
+        default: preview
+        type: choice
+        options:
+          - preview
+          - lunch
+          - dinner
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 코드 내려받기
+        uses: actions/checkout@v4
+
+      - name: Python 설치
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 라이브러리 설치
+        run: pip install -r requirements.txt
+
+      - name: 식단 알림 보내기
+        env:
+          # Secrets는 여기서 환경변수로만 전달합니다. 코드나 로그에 직접 쓰지 않습니다.
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # 수동 실행이면 MODE에 값이 있고, 스케줄 실행이면 CRON에 값이 있습니다.
+          MODE: ${{ inputs.mode }}
+          CRON: ${{ github.event.schedule }}
+        run: |
+          if [ -n "$MODE" ]; then
+            python main.py --mode "$MODE"
+          else
+            python main.py --cron "$CRON"
+          fi
