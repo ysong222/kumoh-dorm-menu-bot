@@ -28,8 +28,10 @@ python main.py --mode preview --date 2026-11-13 --html-file tests/fixtures/menu_
 
 ## 알아둘 것
 
-- Claude 클라우드 세션에서는 `dorm.kumoh.ac.kr` 접속이 막혀 있다. 실제 접속 확인은 GitHub Actions의
-  "학교 사이트 접속 테스트" 워크플로(`connection-test.yml`)나 사용자의 로컬 실행으로 한다.
+- Claude 클라우드 세션에서는 기본 환경(Default)이면 `dorm.kumoh.ac.kr` 접속이 막혀 있다.
+  이 주소를 허용한 `kumoh-dorm-menu-bot` 환경에서는 `python main.py --mode preview --dry-run`으로 실제 페이지를 확인할 수 있다.
+- 식단 페이지는 `?mode=menuList&srDt=YYYY-MM-DD`로 그 날짜가 속한 주(월~일)의 표를 준다.
+  식단이 아직 등록되지 않은 주는 표 본문이 `<td colspan="7">등록된 메뉴가 없습니다.</td>` 한 칸뿐이다.
 - 파서 동작은 `tests/fixtures/menu_sample.html`(실제 페이지에서 복사한 표)로 검증한다.
   사이트 구조가 바뀌면 이 샘플부터 새로 받아서 교체한다.
 - 날짜는 항상 한국 시간(`Asia/Seoul`) 기준으로 계산한다. Actions 러너의 시간대는 UTC다.
