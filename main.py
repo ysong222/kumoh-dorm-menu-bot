@@ -50,7 +50,7 @@ def main() -> int:
         if args.html_file:
             html = Path(args.html_file).read_text(encoding="utf-8")
         else:
-            html = fetch_menu_html()
+            html = fetch_menu_html(today)
         week = parse_menu(html, today)
         text = build_menu_message(mode, today, week)
     except Exception as error:  # 접속/파싱 실패는 물론 예상 못 한 오류도 알림으로 보냄

@@ -70,6 +70,20 @@ class ParseEdgeCaseTest(unittest.TestCase):
         self.assertIn(date(2026, 12, 28), week)
         self.assertIn(date(2027, 1, 3), week)
 
+    def test_week_without_menu_keeps_site_notice(self):
+        # 식단이 아직 등록되지 않은 주의 실제 응답 형태
+        start = SAMPLE_HTML.index("<tbody>") + len("<tbody>")
+        end = SAMPLE_HTML.index("</tbody>")
+        html = (
+            SAMPLE_HTML[:start]
+            + '<td colspan="7">등록된 메뉴가 없습니다.</td>'
+            + SAMPLE_HTML[end:]
+        )
+        week = parse_menu(html, TODAY)
+        self.assertEqual(len(week), 7)
+        self.assertEqual(week[TODAY]["중식"].note, "등록된 메뉴가 없습니다.")
+        self.assertEqual(week[TODAY]["석식"].items, [])
+
     def test_page_without_menu_table_raises(self):
         with self.assertRaises(MenuParseError):
             parse_menu("<html><body><p>점검 중입니다</p></body></html>", TODAY)

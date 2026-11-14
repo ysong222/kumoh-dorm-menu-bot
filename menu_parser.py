@@ -61,12 +61,19 @@ class Meal:
 WeekMenu = dict[date, dict[str, Meal]]
 
 
-def fetch_menu_html(url: str = MENU_URL, attempts: int = 3) -> str:
-    """식단 페이지 HTML을 가져옵니다. 일시적 오류에 대비해 몇 번 재시도합니다."""
+def fetch_menu_html(day: date, url: str = MENU_URL, attempts: int = 3) -> str:
+    """day가 속한 주의 식단 페이지 HTML을 가져옵니다.
+
+    사이트는 srDt 파라미터의 날짜가 속한 주(월~일)의 표를 보여줍니다.
+    일시적 오류에 대비해 몇 번 재시도합니다.
+    """
+    params = {"mode": "menuList", "srDt": day.isoformat()}
     last_error: Exception | None = None
     for attempt in range(1, attempts + 1):
         try:
-            response = requests.get(url, headers=REQUEST_HEADERS, timeout=30)
+            response = requests.get(
+                url, params=params, headers=REQUEST_HEADERS, timeout=30
+            )
             response.raise_for_status()  # 404, 500 같은 응답이면 예외 발생
         except requests.RequestException as error:
             last_error = error
@@ -101,6 +108,8 @@ def parse_menu(html: str, today: date) -> WeekMenu:
         cells = row.find_all("td", recursive=False)
         if not cells:
             continue  # 헤더 줄 등 td가 없는 줄은 건너뜀
+        if len(cells) == 1 and cells[0].get("colspan"):
+            continue  # 표 전체를 차지하는 안내 문구 줄은 아래에서 따로 처리
         if len(cells) != len(dates):
             raise MenuParseError(
                 f"식단 줄의 칸 수({len(cells)})가 날짜 수({len(dates)})와 다릅니다."
@@ -119,7 +128,14 @@ def parse_menu(html: str, today: date) -> WeekMenu:
         row_count += 1
 
     if row_count == 0:
-        raise MenuParseError("식단표에 식단 줄이 하나도 없습니다.")
+        # 식단이 아직 안 올라온 주는 표 본문에 줄(<tr>) 없이
+        # "등록된 메뉴가 없습니다." 문구만 들어 있습니다.
+        body = table.find("tbody")
+        notice = " ".join(body.get_text(" ", strip=True).split()) if body else ""
+        if not notice:
+            raise MenuParseError("식단표 본문이 비어 있습니다.")
+        for day in dates:
+            week[day] = {label: Meal(note=notice) for label in ("중식", "석식")}
     return week
 
 
