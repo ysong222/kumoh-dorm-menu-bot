@@ -1,0 +1,30 @@
+name: 학교 사이트 접속 테스트
+
+# 언제 실행할지 정하는 부분
+on:
+  pull_request: # PR을 열거나 PR에 새 커밋이 올라올 때 자동 실행
+  workflow_dispatch: # Actions 탭에서 "Run workflow" 버튼으로 수동 실행
+
+# 이 워크플로는 코드를 읽기만 하면 되므로 최소 권한만 줍니다.
+permissions:
+  contents: read
+
+jobs:
+  connection-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 코드 내려받기
+        uses: actions/checkout@v4
+
+      - name: Python 설치
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 라이브러리 설치
+        run: pip install -r requirements.txt
+
+      - name: 접속 테스트
+        run: python check_connection.py
