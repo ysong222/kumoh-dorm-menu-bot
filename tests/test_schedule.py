@@ -12,7 +12,7 @@ KST = ZoneInfo("Asia/Seoul")
 WORKFLOW = Path(__file__).parent.parent / ".github" / "workflows" / "menu-notify.yml"
 
 # 알림 종류별로 원하는 한국 시간 (시, 분)
-EXPECTED_KST_TIME = {"preview": (8, 0), "lunch": (11, 0), "dinner": (16, 30)}
+EXPECTED_KST_TIME = {"preview": (7, 50), "lunch": (10, 50), "dinner": (16, 20)}
 KST_WEEKDAYS = {0, 1, 2, 3, 4}  # date.weekday() 기준 월~금
 
 

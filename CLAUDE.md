@@ -38,5 +38,7 @@ python main.py --mode preview --date 2026-11-13 --html-file tests/fixtures/menu_
 - 오늘 칸은 표의 위치가 아니라 헤더의 날짜(`월(11.09)`)로 찾는다. 식단표는 주 단위로 갱신된다.
 - cron은 UTC다. `.github/workflows/menu-notify.yml`의 cron과 `main.py`의 `CRON_TO_MODE`는 항상 같아야 하고,
   `tests/test_schedule.py`가 일치 여부와 KST 변환을 검사한다.
+- GitHub 예약 실행은 몇 시간씩 늦거나 빠질 수 있다(실제로 16:30 → 다음 날 01:58). cron은 매시 :00/:30을 피하고,
+  `main.py`의 `check_schedule`이 예정 시각~마감(`SEND_DEADLINE`) 밖의 예약 실행은 보내지 않는다.
 - 메뉴의 `*`는 소스를 잇는 표시다(`햄구이*케찹`). 돈육 표시로 해석하지 않고 원문 그대로 보여준다.
 - 알림은 평일만. 미운영/메뉴 없음/식단 미등록/접속·파싱 실패는 모두 텔레그램으로 알린다.
