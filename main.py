@@ -22,12 +22,14 @@ from telegram_client import TelegramError, send_message
 KST = ZoneInfo("Asia/Seoul")
 
 # GitHub Actions의 cron은 UTC 기준입니다. KST = UTC + 9시간.
+# 매시 정각(:00)과 30분(:30)은 GitHub 예약 실행이 몰려서 지연이 심하므로
+# 원하는 시각(08:00, 11:00, 16:30)보다 조금 이르게, 정각이 아닌 분에 잡습니다.
 # 이 표는 .github/workflows/menu-notify.yml 의 cron과 똑같아야 하며,
 # tests/test_schedule.py 가 둘이 일치하는지와 KST 변환이 맞는지 검사합니다.
 CRON_TO_MODE = {
-    "0 23 * * 0-4": "preview",  # UTC 일~목 23:00 = KST 월~금 08:00
-    "0 2 * * 1-5": "lunch",  # UTC 월~금 02:00 = KST 월~금 11:00
-    "30 7 * * 1-5": "dinner",  # UTC 월~금 07:30 = KST 월~금 16:30
+    "50 22 * * 0-4": "preview",  # UTC 일~목 22:50 = KST 월~금 07:50
+    "50 1 * * 1-5": "lunch",  # UTC 월~금 01:50 = KST 월~금 10:50
+    "20 7 * * 1-5": "dinner",  # UTC 월~금 07:20 = KST 월~금 16:20
 }
 
 # GitHub의 예약 실행은 몇 시간씩 늦게 시작되기도 합니다. (예: 16:30 석식 알림이 다음 날 01:58에 실행)

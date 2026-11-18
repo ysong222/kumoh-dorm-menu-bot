@@ -47,8 +47,8 @@ class CheckScheduleTest(unittest.TestCase):
         self.assertFalse(check_schedule(CRON_FOR["dinner"], on_time("dinner", day=21))[0])
 
     def test_cron_kst_time_crosses_midnight(self):
-        # UTC 23:00 은 KST 다음 날 08:00
-        self.assertEqual(cron_kst_time("0 23 * * 0-4").strftime("%H:%M"), "08:00")
+        # UTC 22:50 은 KST 다음 날 07:50
+        self.assertEqual(cron_kst_time("50 22 * * 0-4").strftime("%H:%M"), "07:50")
 
 
 if __name__ == "__main__":
